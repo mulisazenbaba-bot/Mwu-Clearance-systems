@@ -1,0 +1,37 @@
+FROM php:8.2-apache
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    git \
+    libpq-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) pdo pdo_mysql pdo_pgsql gd zip bcmath \
+    && a2enmod rewrite
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy application files
+COPY backend/ .
+
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 storage bootstrap/cache
+
+# Expose port and start Apache
+EXPOSE 8080
+CMD ["apache2-foreground"]
