@@ -2,19 +2,13 @@ FROM php:8.2-apache
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    libzip-dev \
-    zip \
-    unzip \
-    git \
-    libpq-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) pdo pdo_mysql pdo_pgsql gd zip bcmath \
-    && a2enmod rewrite
+    git curl zip unzip libzip-dev libpq-dev
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql zip
+
+# Enable Apache rewrite
+RUN a2enmod rewrite
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -22,16 +16,26 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy application files
+# Copy app from backend folder
 COPY backend/ .
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader --prefer-dist
 
 # Set permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 storage bootstrap/cache
+RUN chmod -R 775 storage bootstrap/cache
 
-# Expose port and start Apache
-EXPOSE 8080
-CMD ["apache2-foreground"]
+# Configure Apache to serve from public folder
+RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
+
+# Create ports.conf with default port 8080
+RUN echo 'Listen 8080' > /etc/apache2/ports.conf
+
+# Update Apache config to use port 8080
+RUN sed -i 's/80/8080/g' /etc/apache2/sites-available/*.conf
+
+# Start script that replaces port with $PORT environment variable
+COPY start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
+CMD ["/usr/local/bin/start.sh"]
