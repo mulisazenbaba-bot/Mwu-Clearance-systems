@@ -39,7 +39,7 @@ start-servers.bat
 - **USER_GUIDE.md** - Complete user guide
 - **EMAIL_SETUP_COMPLETE_GUIDE.md** - Email configuration
 - **TESTING_GUIDE.md** - Testing instructions
-- **DEPLOYMENT_GUIDE.md** - Deployment guide
+- **DEPLOYMENT_GUIDE.md** - Railway deployment guide (FREE)
 - **FINAL_SETUP_SUMMARY.md** - Complete feature summary
 
 ## 👥 Test Accounts

@@ -109,3 +109,12 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/student/dashboard', [ClearanceRequestController::class, 'studentDashboard']);
     });
 });
+
+// Health check endpoint for Render
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'healthy',
+        'timestamp' => now(),
+        'service' => 'MWU Clearance System API'
+    ]);
+});

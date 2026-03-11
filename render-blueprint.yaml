@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: mwu-clearance-backend
+    env: docker
+    dockerfilePath: ./backend/Dockerfile.simple
+    dockerContext: ./backend
+    envVars:
+      - key: APP_NAME
+        value: MWU Clearance System
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        value: base64:3599zkGqMDPrSBaZIK8LaT5/mSvSzYzAQOyGUdnLjzY=
+      - key: JWT_SECRET
+        value: QFnpVTQk1Trz6agDyg1cqYadu2crR3u0rw5FtzB48y7BlOphopl9fxRmkP0tgAF4
+      - key: FRONTEND_URL
+        value: https://your-vercel-frontend.vercel.app
+    healthCheckPath: /api/health
+    autoDeploy: true
+    plan: free
+
+databases:
+  - name: mwu-clearance-db
+    databaseName: mwu_clearance
+    user: mwu_user
+    plan: free

@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: mwu-clearance-backend
+    env: docker
+    dockerfilePath: ./backend/Dockerfile.render
+    dockerContext: ./backend
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        value: base64:3599zkGqMDPrSBaZIK8LaT5/mSvSzYzAQOyGUdnLjzY=
+      - key: APP_URL
+        value: https://mwu-clearance-backend.onrender.com
+      - key: LOG_CHANNEL
+        value: stderr
+    healthCheckPath: /api/health
+    autoDeploy: true
+    rootDir: backend
+    plan: free

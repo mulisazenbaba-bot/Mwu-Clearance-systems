@@ -1,0 +1,44 @@
+# Use PHP 8.2 with Apache for Render
+FROM php:8.2-apache
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    libpq-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql gd zip bcmath \
+    && a2enmod rewrite
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy application files
+COPY . .
+
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Set permissions for Laravel
+RUN chown -R www-data:www-data /var/www/html/storage \
+    && chmod -R 775 /var/www/html/storage \
+    && chmod -R 775 /var/www/html/bootstrap/cache
+
+# Copy Apache configuration
+COPY .docker/apache.conf /etc/apache2/sites-available/000-default.conf
+
+# Expose port 10000 (Render uses dynamic ports)
+EXPOSE 10000
+
+# Start Apache on port 10000
+CMD sed -i 's/80/10000/g' /etc/apache2/ports.conf /etc/apache2/sites-available/*.conf && \
+    apache2-foreground

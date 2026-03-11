@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: mwu-clearance-backend
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: APP_URL
+        sync: false
+    buildCommand: ""
+    startCommand: ""
+    healthCheckPath: /api/health
+    autoDeploy: true
+    rootDir: backend
+databases:
+  - name: mwu-clearance-db
+    databaseName: mwu_clearance
+    user: mwu_user
+    plan: free
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: everywhere
