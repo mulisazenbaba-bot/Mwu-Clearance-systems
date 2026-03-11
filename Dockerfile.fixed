@@ -1,0 +1,42 @@
+FROM php:8.2-apache
+
+# Install system dependencies: zip, unzip, git
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    libpq-dev
+
+# Install PHP extensions including zip
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql gd zip bcmath
+
+# Enable Apache rewrite
+RUN a2enmod rewrite
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy app from backend folder
+COPY backend/ .
+
+# Install dependencies with prefer-dist to avoid git issues
+RUN composer install --no-dev --optimize-autoloader --prefer-dist
+
+# Set permissions for Laravel
+RUN chown -R www-data:www-data storage bootstrap/cache
+RUN chmod -R 775 storage bootstrap/cache
+
+# Expose port
+EXPOSE 8080
+
+# Start Apache
+CMD ["apache2-foreground"]
