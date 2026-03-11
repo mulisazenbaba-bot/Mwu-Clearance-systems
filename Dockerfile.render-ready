@@ -1,0 +1,43 @@
+FROM php:8.2-apache
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    libpq-dev
+
+# Install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql gd zip bcmath
+
+# Enable Apache rewrite
+RUN a2enmod rewrite
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy app from backend folder
+COPY backend/ .
+
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader --prefer-dist
+
+# Set permissions
+RUN chown -R www-data:www-data storage bootstrap/cache
+RUN chmod -R 775 storage bootstrap/cache
+
+# Configure Apache for Render (dynamic port)
+RUN echo 'Listen ${PORT:-8080}' > /etc/apache2/ports.conf
+RUN sed -i 's/80/${PORT:-8080}/g' /etc/apache2/sites-available/*.conf
+
+# Start Apache
+CMD ["apache2-foreground"]
