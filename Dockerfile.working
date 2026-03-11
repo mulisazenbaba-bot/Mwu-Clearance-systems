@@ -1,0 +1,32 @@
+FROM php:8.2-apache
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git curl zip unzip libzip-dev libpq-dev
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql zip
+
+# Enable Apache rewrite
+RUN a2enmod rewrite
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy app from backend folder
+COPY backend/ .
+
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader --prefer-dist
+
+# Set permissions
+RUN chmod -R 775 storage bootstrap/cache
+
+# Configure Apache to serve from public folder
+RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
+
+# Start Apache (Render will handle port via $PORT environment variable)
+CMD sed -i "s/80/${PORT:-8080}/g" /etc/apache2/ports.conf /etc/apache2/sites-available/*.conf && apache2-foreground
