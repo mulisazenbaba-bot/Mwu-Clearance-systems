@@ -26,6 +26,7 @@ return [
         'https://mwu-clearance-systems.vercel.app', // Your exact Vercel frontend
         'https://mwu-clearance-system.vercel.app',
         'https://*.vercel.app', // All Vercel subdomains
+        '*', // Allow all origins for testing
     ],
 
     'allowed_origins_patterns' => [
