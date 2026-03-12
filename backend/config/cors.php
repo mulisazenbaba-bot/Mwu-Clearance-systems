@@ -19,15 +19,9 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
-        env('FRONTEND_URL', 'http://localhost:3000'),
-        'http://localhost:3000',
-        'http://localhost:3001',
-        'https://mwu-clearance-systems.vercel.app', // Your exact Vercel frontend
-        'https://mwu-clearance-system.vercel.app',
-        'https://*.vercel.app', // All Vercel subdomains
-        '*', // Allow all origins for testing
-    ],
+    'allowed_origins' => ['*'], // Allow ALL origins for now
+
+    'allowed_origins_patterns' => [],
 
     'allowed_origins_patterns' => [
         '/^https:\/\/.*\.vercel\.app$/',
