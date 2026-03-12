@@ -23,6 +23,9 @@ return [
         env('FRONTEND_URL', 'http://localhost:3000'),
         'http://localhost:3000',
         'http://localhost:3001',
+        'https://mwu-clearance-systems.vercel.app', // Your exact Vercel frontend
+        'https://mwu-clearance-system.vercel.app',
+        'https://*.vercel.app', // All Vercel subdomains
     ],
 
     'allowed_origins_patterns' => [
